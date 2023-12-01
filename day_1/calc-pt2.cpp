@@ -75,5 +75,4 @@ int main() {
         sum += number;
     }
     cout << "the result is: " << sum << endl;
-    cout.flush();
 }
