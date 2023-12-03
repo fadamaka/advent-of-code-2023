@@ -1,15 +1,16 @@
 #include <..\utils\aoc.h>
 
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 
 using namespace std;
 
-bool checkNeighbour(vector<string> lines, int i, int j);
-int getNumber(string line, int j);
-int skipAhead(string line, int j);
+int getNumbers(vector<string> lines, int i, int j);
+string getNumber(int x, string line, int j);
 bool isInt(char chr);
+vector<string> customSplit(string str);
 
 int main() {
     vector<string> lines = readFileIntoVector("data.txt");
@@ -18,29 +19,26 @@ int main() {
         for (int j = 0; j < lines[i].size(); j++) {
             // cout << lines[i][j];
             int charAsInt = int(lines[i][j]);
-            if (isInt(lines[i][j])) {
-                if (checkNeighbour(lines, i, j)) {
-                    sum += getNumber(lines[i], j);
-                    // cout << "found number: " << getNumber(lines[i], j) << endl;
-                    j = skipAhead(lines[i], j);
-                }
+            if (lines[i][j] == '*') {
+                sum += getNumbers(lines, i, j);
             }
         }
-        // cout << endl;
     }
-
     cout << "result: " << sum << endl;
+    // cout << endl;
 }
 
-bool checkNeighbour(vector<string> lines, int i, int j) {
+int getNumbers(vector<string> lines, int i, int j) {
+    // cout << "i: " << i << " j: " << j << endl;
+    set<string> numbers;
     /*
     ###
     #N#
     ##T
     */
     if (i + 1 < lines.size() && j + 1 < lines[i].size()) {
-        if (!isInt(lines[i + 1][j + 1]) && lines[i + 1][j + 1] != '.') {
-            return true;
+        if (isInt(lines[i + 1][j + 1])) {
+            numbers.insert(getNumber(i + 1, lines[i + 1], j + 1));
         }
     }
     /*
@@ -49,8 +47,8 @@ bool checkNeighbour(vector<string> lines, int i, int j) {
     ###
     */
     if (i - 1 >= 0 && j - 1 >= 0) {
-        if (!isInt(lines[i - 1][j - 1]) && lines[i - 1][j - 1] != '.') {
-            return true;
+        if (isInt(lines[i - 1][j - 1])) {
+            numbers.insert(getNumber(i - 1, lines[i - 1], j - 1));
         }
     }
 
@@ -60,8 +58,8 @@ bool checkNeighbour(vector<string> lines, int i, int j) {
     T##
     */
     if (i + 1 < lines.size() && j - 1 >= 0) {
-        if (!isInt(lines[i + 1][j - 1]) && lines[i + 1][j - 1] != '.') {
-            return true;
+        if (isInt(lines[i + 1][j - 1])) {
+            numbers.insert(getNumber(i + 1, lines[i + 1], j - 1));
         }
     }
     /*
@@ -70,8 +68,8 @@ bool checkNeighbour(vector<string> lines, int i, int j) {
     ###
     */
     if (i - 1 >= 0 && j + 1 < lines[i].size()) {
-        if (!isInt(lines[i - 1][j + 1]) && lines[i - 1][j + 1] != '.') {
-            return true;
+        if (isInt(lines[i - 1][j + 1])) {
+            numbers.insert(getNumber(i - 1, lines[i - 1], j + 1));
         }
     }
     /*
@@ -80,8 +78,8 @@ bool checkNeighbour(vector<string> lines, int i, int j) {
     ###
     */
     if (i - 1 >= 0) {
-        if (!isInt(lines[i - 1][j]) && lines[i - 1][j] != '.') {
-            return true;
+        if (isInt(lines[i - 1][j])) {
+            numbers.insert(getNumber(i - 1, lines[i - 1], j));
         }
     }
     /*
@@ -90,8 +88,8 @@ bool checkNeighbour(vector<string> lines, int i, int j) {
     #T#
     */
     if (i + 1 < lines.size()) {
-        if (!isInt(lines[i + 1][j]) && lines[i + 1][j] != '.') {
-            return true;
+        if (isInt(lines[i + 1][j])) {
+            numbers.insert(getNumber(i + 1, lines[i + 1], j));
         }
     }
     /*
@@ -100,8 +98,8 @@ bool checkNeighbour(vector<string> lines, int i, int j) {
     ###
     */
     if (j + 1 < lines[i].size()) {
-        if (!isInt(lines[i][j + 1]) && lines[i][j + 1] != '.') {
-            return true;
+        if (isInt(lines[i][j + 1])) {
+            numbers.insert(getNumber(i, lines[i], j + 1));
         }
     }
     /*
@@ -110,14 +108,23 @@ bool checkNeighbour(vector<string> lines, int i, int j) {
     ###
     */
     if (j - 1 >= 0) {
-        if (!isInt(lines[i][j - 1]) && lines[i][j - 1] != '.') {
-            return true;
+        if (isInt(lines[i][j - 1])) {
+            numbers.insert(getNumber(i, lines[i], j - 1));
         }
     }
-
-    return false;
+    if (numbers.size() == 2) {
+        set<string>::iterator it = numbers.begin();
+        std::advance(it, 0);
+        string num1 = *it;
+        std::advance(it, 1);
+        string num2 = *it;
+        // cout << num1 << " * " << num2 << endl;
+        // cout << stoi(customSplit(num1)[2]) << " * " << stoi(customSplit(num2)[2]) << endl;
+        return stoi(customSplit(num1)[2]) * stoi(customSplit(num2)[2]);
+    }
+    return 0;
 }
-int getNumber(string line, int j) {
+string getNumber(int x, string line, int j) {
     string strNum = "";
     for (int i = j; i < line.size(); i++) {
         if (isInt(line[i])) {
@@ -131,19 +138,12 @@ int getNumber(string line, int j) {
             if (isInt(line[i])) {
                 strNum = line[i] + strNum;
             } else {
+                j = i + 1;
                 break;
             }
         }
     }
-
-    return stoi(strNum);
-}
-int skipAhead(string line, int j) {
-    int i = j;
-    while (i < line.size() && isInt(line[i])) {
-        i++;
-    }
-    return i - 1;
+    return to_string(x) + "|" + to_string(j) + "|" + strNum;
 }
 
 bool isInt(char chr) {
@@ -152,4 +152,19 @@ bool isInt(char chr) {
     } else {
         return false;
     }
+}
+
+vector<string> customSplit(string str) {
+    int startIndex = 0, endIndex = 0;
+    vector<string> strings;
+    for (int i = 0; i <= str.size(); i++) {
+        if (str[i] == '|' || i == str.size()) {
+            endIndex = i;
+            string temp;
+            temp.append(str, startIndex, endIndex - startIndex);
+            strings.push_back(temp);
+            startIndex = endIndex + 1;
+        }
+    }
+    return strings;
 }
