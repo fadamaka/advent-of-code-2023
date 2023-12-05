@@ -7,5 +7,6 @@ using namespace std;
 
 vector<string> readFileIntoVector(string fileName);
 vector<string> splitByChar(string str, char ch);
+bool isInt(char chr);
 
 #endif

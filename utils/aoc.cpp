@@ -31,3 +31,11 @@ vector<string> splitByChar(string str, char ch) {
     }
     return strings;
 }
+
+bool isInt(char chr) {
+    if (47 < int(chr) && int(chr) < 58) {
+        return true;
+    } else {
+        return false;
+    }
+}
