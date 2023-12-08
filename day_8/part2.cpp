@@ -23,7 +23,6 @@ int main() {
         }
     }
     unsigned long long result = stoll("1");
-    vector<pair<int, int>> exits;
     for (string str : startingPoints) {
         string currentPoz = str;
         int count = 0;
@@ -53,8 +52,6 @@ int main() {
             }
         }
         result = lcm(result, firstExit);
-        exits.push_back(pair<int, int>(firstExit, secondExit));
-        cout << " increment: " << secondExit - firstExit << endl;
     }
 
     cout << result;
