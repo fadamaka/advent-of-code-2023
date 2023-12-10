@@ -9,7 +9,6 @@ using namespace std;
 bool checkNeighbour(vector<string> lines, int i, int j);
 int getNumber(string line, int j);
 int skipAhead(string line, int j);
-bool isInt(char chr);
 
 int main() {
     vector<string> lines = readFileIntoVector("data.txt");
@@ -144,12 +143,4 @@ int skipAhead(string line, int j) {
         i++;
     }
     return i - 1;
-}
-
-bool isInt(char chr) {
-    if (47 < int(chr) && int(chr) < 58) {
-        return true;
-    } else {
-        return false;
-    }
 }
