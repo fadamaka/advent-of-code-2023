@@ -12,7 +12,7 @@
 
 using namespace std;
 
-bool entryValidator(pair<string, vector<int>> input);
+bool entryValidator(string task, string input);
 pair<string, vector<int>> inputParser(string str, int j);
 
 #define K 19
@@ -40,11 +40,12 @@ int main() {
     vector<pair<string, vector<int>>> parsedLinesPt2;
     transform(lines.begin(), lines.end(), back_inserter(parsedLinesPt2), [](const string& str) { return inputParser(str, 1); });
 
-    // for (string str : findBitCombinations(6, 3, {1, 2})) {
-    //     cout << unpack(str, {1, 2}) << endl;
+    // for (string str : findBitCombinations(7, 5, {1, 1, 3})) {
+    //     cout << unpack(str, {1, 1, 3}) << endl;
     // }
     long long result = 0;
     int skip = 0;
+    int blacksheep = 0;
 
     for (int i = skip; i < parsedLines.size(); i++) {
         int markCount2 = 0;
@@ -53,20 +54,26 @@ int main() {
         try {
             pair<string, vector<int>> p = parsedLines[i];
             pair<string, vector<int>> p2 = parsedLinesPt2[i];
-            cout << p.first;
-            for (int i : p.second) {
-                cout << " " << i;
-            }
-            cout << endl;
+            // cout << p.first;
+            // for (int i : p.second) {
+            //     cout << " " << i;
+            // }
+            // cout << endl;
+
+            // cout << p2.first;
+            // for (int i : p2.second) {
+            //     cout << " " << i;
+            // }
+            // cout << endl;
             int markCount = countQuestionMarks(p.first);
             int tagCount = countQuestionTags(p.first);
             int countTags = accumulate(p.second.begin(), p.second.end(), 0);
             // cout << "?: " << markCount << endl;
-            vector<string> combos = findBitCombinations(markCount, countTags - tagCount, p.second);
+            vector<string> combos = findBitCombinations(p.first.size(), countTags, p.second);
             // cout << "combinations: " << combos.size() << endl;
             long long valid = 0;
             for (string str : combos) {
-                if (entryValidator(pair<string, vector<int>>(replaceMarks(p.first, unpack(str, p.second)), p.second))) {
+                if (entryValidator(p.first, unpack(str, p.second))) {
                     valid++;
                 }
             }
@@ -76,7 +83,7 @@ int main() {
             tagCount2 = countQuestionTags(p2.first);
             countTags2 = accumulate(p2.second.begin(), p2.second.end(), 0);
             // cout << "?: " << markCount << endl;
-            vector<string> combos2 = findBitCombinations(markCount2, countTags2 - tagCount2, p2.second);
+            vector<string> combos2 = findBitCombinations(p2.first.size(), countTags2, p2.second);
             // cout << i + 1 << " combinations: " << combos2.size() << endl;
 
             int threadCount = 32;
@@ -86,67 +93,81 @@ int main() {
             // sV.push_back(v1);
             long long valid2 = 0;
             int yep = 0;
-        startover:
-            futureLongs.push_back(async(&workFunc, p2, combos2.begin(), combos2.begin() + (combos2.size() / threadCount)));
-            for (size_t j = 1; j < threadCount - 1; j++) {
-                futureLongs.push_back(async(&workFunc, p2, combos2.begin() + (combos2.size() / threadCount) * j, combos2.begin() + (combos2.size() / threadCount) * (j + 1)));
-                // sV.push_back(v2);
-            }
+            if (combos2.size() < 10000000) {
+                for (string str : combos2) {
+                    if (entryValidator(p2.first, unpack(str, p2.second))) {
+                        valid2++;
+                    }
+                }
+            } else {
+                cout << "async" << endl;
 
-            futureLongs.push_back(async(&workFunc, p2, combos2.begin() + (combos2.size() / threadCount) * (threadCount - 1), combos2.end()));
+            startover:
+                futureLongs.push_back(async(&workFunc, p2, combos2.begin(), combos2.begin() + (combos2.size() / threadCount)));
+                for (size_t j = 1; j < threadCount - 1; j++) {
+                    futureLongs.push_back(async(&workFunc, p2, combos2.begin() + (combos2.size() / threadCount) * j, combos2.begin() + (combos2.size() / threadCount) * (j + 1)));
+                    // sV.push_back(v2);
+                }
 
-            // sV.push_back(v8);
-            for (int i = 0; i < futureLongs.size(); i++) {
-                valid2 += futureLongs[i].get();
-                // sV[i].clear();
-                // sV[i].shrink_to_fit();
-            }
-            futureLongs.clear();
-            futureLongs.shrink_to_fit();
-            if (combos2.size() == 100000000) {
-                cout << "yep: " << ++yep;
-                string comboC = combos2[combos2.size() - 1];
-                combos2.clear();
-                combos2.shrink_to_fit();
-                combos2 = continueCombinations(comboC);
-                goto startover;
+                futureLongs.push_back(async(&workFunc, p2, combos2.begin() + (combos2.size() / threadCount) * (threadCount - 1), combos2.end()));
+
+                // sV.push_back(v8);
+                for (int i = 0; i < futureLongs.size(); i++) {
+                    valid2 += futureLongs[i].get();
+                    // sV[i].clear();
+                    // sV[i].shrink_to_fit();
+                }
+                futureLongs.clear();
+                futureLongs.shrink_to_fit();
+                if (combos2.size() == 100000000) {
+                    cout << "yep: " << ++yep << endl;
+                    string comboC = combos2[combos2.size() - 1];
+                    combos2.clear();
+                    combos2.shrink_to_fit();
+                    combos2 = continueCombinations(comboC);
+                    goto startover;
+                }
             }
             combos2.clear();
             combos2.shrink_to_fit();
-            cout << valid2 << endl;
+            if (valid2 % valid != 0) {
+                cout << i + 1 << " black sheep found!" << endl;
+                ++blacksheep;
+            }
+            // cout << i + 1 << ": " << valid2 << "/" << valid << "=" << valid2 / valid << " pow:" << pow(valid2 / valid, 4) << endl;
             long long subresult = valid * pow(valid2 / valid, 4);
             // cout << i + 1 << ": " << subresult << endl;
             result += subresult;
-            // cout << result << endl;
-            if ((i + 1) % 10 == 0) {
-                cout << (i + 1) / 10 << "%" << endl;
-            }
+            // cout << "res: " << result << endl;
+            //  if ((i + 1) % 10 == 0) {
+            //      cout << (i + 1) / 10 << "%" << endl;
+            //  }
+            // break;
         } catch (const std::exception& e) {
             cout << e.what() << endl;
             cout << "i: " << i << " markcount: " << markCount2 << " tagcount: " << tagCount2 << " countags: " << countTags2 << endl;
             break;
         }
     }
-    cout << result;
+    cout << blacksheep;
 }
 
-bool entryValidator(pair<string, vector<int>> input) {
-    vector<string> springs = splitByChar(input.first, '.');
-    set<char> springsCharSet(input.first.begin(), input.first.end());
-    if (springsCharSet.find('?') != springsCharSet.end()) {
-        cout << "bad input" << endl;
+bool entryValidator(string task, string input) {
+    if (task.size() != input.size()) {
+        // cout << input << " false" << endl;
+
         return false;
     }
-    vector<string> filteredSprings;
-    copy_if(springs.begin(), springs.end(), back_inserter(filteredSprings), [](const string& str) { return str.size() > 0; });
-    if (filteredSprings.size() != input.second.size()) {
-        return false;
-    }
-    for (int i = 0; i < filteredSprings.size(); i++) {
-        if (filteredSprings[i].size() != input.second[i]) {
+    for (int i = 0; i < task.size(); i++) {
+        if (task[i] != '?' && task[i] != input[i]) {
+            // cout << input << " false" << endl;
             return false;
         }
     }
+
+    // cout << task << endl;
+    // cout << input << " true" << endl;
+
     return true;
 }
 
@@ -168,7 +189,7 @@ pair<string, vector<int>> inputParser(string str, int j) {
 vector<string> findBitCombinations(int k, int hashtags, vector<int> v) {
     string combo;
     vector<string> result;
-    for (int i = 0; i < k - hashtags; i++) {
+    for (int i = 0; i < k - hashtags - v.size() + 1; i++) {
         combo += '.';
     }
     for (int i = 0; i < v.size(); i++) {
@@ -200,6 +221,9 @@ vector<string> findBitCombinations(int k, int hashtags, vector<int> v) {
         }
         combo.replace(rfound, 2, "#.");
         result.push_back(combo);
+        if (result.size() > 99999999) {
+            return result;
+        }
     }
 
     return result;
@@ -275,7 +299,7 @@ int countQuestionTags(string str) {
 long long workFunc(pair<string, vector<int>> p, vector<string>::iterator begin, vector<string>::iterator end) {
     long long valid2 = 0;
     for (vector<string>::iterator it = begin; it != end; it++) {
-        if (entryValidator(pair<string, vector<int>>(replaceMarks(p.first, unpack(*it, p.second)), p.second))) {
+        if (entryValidator(p.first, unpack(*it, p.second))) {
             valid2++;
         }
     }
@@ -284,6 +308,7 @@ long long workFunc(pair<string, vector<int>> p, vector<string>::iterator begin, 
 }
 
 string unpack(string str, vector<int> v) {
+    // cout << "packed: " << str << endl;
     string result;
     int i = 0;
     for (char ch : str) {
