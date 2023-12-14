@@ -24,11 +24,12 @@ pair<string, vector<int>> inputParser(string str, int j) {
 }
 
 unsigned long long int solve(string springs, vector<int> groups, map<pair<int, vector<int>>, unsigned long long int>& cache, int i) {
+    unsigned long long int result = 0ULL;
     if (groups.size() == 0) {
         if (springs.size() > i && springs.substr(i).find('#') != string::npos) {
             return 0ULL;
         } else {
-            return 1000000000ULL;
+            return 1ULL;
         }
     }
     while (i < springs.size() && springs[i] != '#' && springs[i] != '?') {
@@ -37,18 +38,18 @@ unsigned long long int solve(string springs, vector<int> groups, map<pair<int, v
     if (i > springs.size()) {
         return 0ULL;
     }
-    if (cache.count(pair<int, vector<int>>(i, groups))) {
+    if (cache.count(pair<int, vector<int>>(i, groups)) > 0) {
         return cache.find(pair<int, vector<int>>(i, groups))->second;  // i num groups
     }
-    unsigned long long int result = 0;
     if (springs.size() >= (i + groups[0]) && springs.substr(i, groups[0]).find('.') == string::npos && (i + groups[0] >= springs.size() || springs[i + groups[0]] == '.' || springs[i + groups[0]] == '?')) {
         vector<int> v(groups.begin() + 1, groups.end());
-        result += solve(springs, v, cache, i + groups[0] + 1);
+        unsigned long long subresult = solve(springs, v, cache, i + groups[0] + 1);
+        result += subresult;
     }
     if (springs[i] == '?') {
         result += solve(springs, groups, cache, i + 1);
     }
-    cache.insert(pair<pair<int, vector<int>>, int>(pair<int, vector<int>>(i, groups), result));
+    cache.insert(pair<pair<int, vector<int>>, unsigned long long int>(pair<int, vector<int>>(i, groups), result));
     return result;
 }
 
@@ -56,15 +57,12 @@ int main() {
     vector<string> lines = readFileIntoVector("data.txt");
 
     vector<pair<string, vector<int>>> parsedLines;
-    transform(lines.begin(), lines.end(), back_inserter(parsedLines), [](const string& str) { return inputParser(str, 0); });
+    transform(lines.begin(), lines.end(), back_inserter(parsedLines), [](const string& str) { return inputParser(str, 4); });
     unsigned long long int result = 0;
     for (pair<string, vector<int>> p : parsedLines) {
         map<pair<int, vector<int>>, unsigned long long int> cache;
-        unsigned long long int subresult = solve(p.first, p.second, cache, 0);
-        cout << subresult << endl;
-        result += subresult;
+        result += solve(p.first, p.second, cache, 0);
     }
 
     cout << result << endl;
-    cout << sizeof(unsigned long long int) << " " << sizeof(void*) << endl;
 }
