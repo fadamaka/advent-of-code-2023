@@ -121,7 +121,7 @@ int main() {
                 }
             }
         }
-        if (c > 15000) {
+        if (c > 500) {
             if (cycle == result && exitAt == 0) {
                 cout << "cycle length: " << c - cycleN + 1 << endl;
                 exitAt = c - cycleN + 1;
