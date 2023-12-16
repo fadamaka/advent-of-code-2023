@@ -8,23 +8,29 @@
 
 using namespace std;
 
-struct Hash {
-    size_t operator()(const string& str) const {
-        size_t hash{};
-        for (const auto c : str) {
-            hash += size_t(c);
-            hash *= 17;
-            hash %= 256;
-        }
-        return hash;
+int hasher(string str) {
+    int result = 0;
+    for (char ch : str) {
+        result += int(ch);
+        result *= 17;
+        result %= 256;
+    }
+    return result;
+}
+
+namespace std {
+template <>
+struct hash<string> {
+    size_t operator()(const string& x) const {
+        return std::hash<int>{}(hasher(x));
     }
 };
+}  // namespace std
 
 int main() {
     vector<string> lines = readFileIntoVector("data.txt");
     vector<string> input = splitByChar(lines[0], ',');
-
-    unordered_map<string, int, Hash> uMap;
+    unordered_map<string, int> uMap;
 
     for (string str : input) {
         if (str.find('=') != string::npos) {
@@ -40,8 +46,8 @@ int main() {
 
     for (int i = 0; i < uMap.bucket_count(); i++) {
         int bSize = uMap.bucket_size(i);
-        for (unordered_map<string, int, Hash>::local_iterator it = uMap.begin(i); it != uMap.end(i); ++it) {
-            result += (i + 1) * bSize-- * it->second;
+        for (unordered_map<string, int>::local_iterator it = uMap.begin(i); it != uMap.end(i); ++it) {
+            result += (hasher(it->first) + 1) * bSize-- * it->second;
         }
     }
 
