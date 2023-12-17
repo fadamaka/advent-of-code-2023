@@ -33,7 +33,7 @@ struct Node {
 
 vector<vector<Node>> nodeMatrix;
 void calculatePath(int y, int x);
-void checkNode(Node current, int loopY, int loopX, direction targetDir, int& targetY, int& targetX, int& targetShortest) {
+void checkNode(Node current, int loopY, int loopX, direction targetDir) {
     Node targetNode = nodeMatrix[loopY][loopX];
     if (current.shortest + targetNode.weight <= targetNode.shortest) {
         nodeMatrix[loopY][loopX].shortest = current.shortest + targetNode.weight;
@@ -43,18 +43,20 @@ void checkNode(Node current, int loopY, int loopX, direction targetDir, int& tar
         } else {
             nodeMatrix[loopY][loopX].step = 1;
         }
-        if (current.shortest + targetNode.weight < targetShortest) {
-            targetShortest = current.shortest + targetNode.weight;
-            targetY = loopY;
-            targetX = loopX;
-        }
+
         calculatePath(loopY, loopX);
     }
 }
 
 void calculatePath(int y, int x) {
-    cout << recCount++ << " " << y << ":" << x << endl;
+    // cout << recCount++ << " " << y << ":" << x << endl;
     Node current = nodeMatrix[y][x];
+    if (current.shortest > nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest) {
+        return;
+    }
+    if (y == nodeMatrix.size() - 1 && x == nodeMatrix[0].size() - 1) {
+        cout << "yolo result: " << current.shortest << endl;
+    }
     set<direction> allowedDir;
     int targetShortest = INT_MAX;
     int targetY = 0;
@@ -73,26 +75,23 @@ void calculatePath(int y, int x) {
     }
     Node targetNode;
     for (direction d : allowedDir) {
-        int loopY = y;
-        int loopX = x;
         if (d == N && y > 0) {
-            checkNode(current, y - 1, x, d, targetY, targetX, targetShortest);
+            checkNode(current, y - 1, x, d);
         }
         if (d == S && y < nodeMatrix.size() - 1) {
-            checkNode(current, y + 1, x, d, targetY, targetX, targetShortest);
+            checkNode(current, y + 1, x, d);
         }
         if (d == W && x > 0) {
-            checkNode(current, y, x - 1, d, targetY, targetX, targetShortest);
+            checkNode(current, y, x - 1, d);
         }
         if (d == E && x < nodeMatrix[y].size() - 1) {
-            checkNode(current, y, x + 1, d, targetY, targetX, targetShortest);
+            checkNode(current, y, x + 1, d);
         }
     }
 }
 
 int main() {
     vector<string> lines = readFileIntoVector("data.txt");
-    cout << "as" << endl;
     transform(lines.begin(), lines.end(), back_inserter(nodeMatrix), [](const string& str) { 
         vector<Node> row;
         transform(str.begin(),str.end(), back_inserter(row),[](const char& ch){
