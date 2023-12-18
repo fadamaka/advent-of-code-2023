@@ -32,10 +32,38 @@ struct Node {
 };
 
 vector<vector<Node>> nodeMatrix;
+bool getShortestOverStepLimit(Node targetNode, int y, int x, int currentShortest) {
+    int result = currentShortest;
+    if (targetNode.dir == N && y - (4 - targetNode.step) >= 0) {
+        for (size_t i = 0; i <= (4 - targetNode.step); i++) {
+            result += nodeMatrix[y - i][x].weight;
+        }
+        return result < nodeMatrix[y - (4 - targetNode.step)][x].shortest;
+    }
+    if (targetNode.dir == S && y + (4 - targetNode.step) < nodeMatrix.size()) {
+        for (size_t i = 0; i <= (4 - targetNode.step); i++) {
+            result += nodeMatrix[y + i][x].weight;
+        }
+        return result < nodeMatrix[y + (4 - targetNode.step)][x].shortest;
+    }
+    if (targetNode.dir == W && x - (4 - targetNode.step) >= 0) {
+        for (size_t i = 0; i <= (4 - targetNode.step); i++) {
+            result += nodeMatrix[y][x - i].weight;
+        }
+        return result < nodeMatrix[y][x - (4 - targetNode.step)].shortest;
+    }
+    if (targetNode.dir == E && x + (4 - targetNode.step) < nodeMatrix[y].size()) {
+        for (size_t i = 0; i <= (4 - targetNode.step); i++) {
+            result += nodeMatrix[y][x + i].weight;
+        }
+        return result < nodeMatrix[y][x + (4 - targetNode.step)].shortest;
+    }
+    return false;
+}
 void calculatePath(int y, int x);
 void checkNode(Node current, int loopY, int loopX, direction targetDir) {
     Node targetNode = nodeMatrix[loopY][loopX];
-    if (current.shortest + targetNode.weight <= targetNode.shortest || targetNode.step > 1) {
+    if (current.shortest + targetNode.weight < targetNode.shortest || getShortestOverStepLimit(targetNode, loopY, loopX, current.shortest)) {
         nodeMatrix[loopY][loopX].shortest = current.shortest + targetNode.weight;
         nodeMatrix[loopY][loopX].dir = targetDir;
         if (targetDir == current.dir) {
@@ -51,12 +79,12 @@ void checkNode(Node current, int loopY, int loopX, direction targetDir) {
 void calculatePath(int y, int x) {
     // cout << recCount++ << " " << y << ":" << x << endl;
     Node current = nodeMatrix[y][x];
-    if (current.shortest > 943 || current.shortest > nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest) {
+    if (current.shortest > (nodeMatrix.size() + nodeMatrix[y].size()) * 9 || current.shortest > nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest) {
         return;
     }
-    if (y == nodeMatrix.size() - 1 && x == nodeMatrix[0].size() - 1) {
-        cout << "yolo result: " << current.shortest << endl;
-    }
+    // if (y == nodeMatrix.size() - 1 && x == nodeMatrix[0].size() - 1) {
+    //     cout << "yolo result: " << current.shortest << endl;
+    // }
     set<direction> allowedDir;
     int targetShortest = INT_MAX;
     int targetY = 0;
