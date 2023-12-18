@@ -35,7 +35,7 @@ vector<vector<Node>> nodeMatrix;
 void calculatePath(int y, int x);
 void checkNode(Node current, int loopY, int loopX, direction targetDir) {
     Node targetNode = nodeMatrix[loopY][loopX];
-    if (current.shortest + targetNode.weight <= targetNode.shortest) {
+    if (current.shortest + targetNode.weight <= targetNode.shortest || targetNode.step > 1) {
         nodeMatrix[loopY][loopX].shortest = current.shortest + targetNode.weight;
         nodeMatrix[loopY][loopX].dir = targetDir;
         if (targetDir == current.dir) {
@@ -51,7 +51,7 @@ void checkNode(Node current, int loopY, int loopX, direction targetDir) {
 void calculatePath(int y, int x) {
     // cout << recCount++ << " " << y << ":" << x << endl;
     Node current = nodeMatrix[y][x];
-    if (current.shortest > nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest) {
+    if (current.shortest > 943 || current.shortest > nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest) {
         return;
     }
     if (y == nodeMatrix.size() - 1 && x == nodeMatrix[0].size() - 1) {
