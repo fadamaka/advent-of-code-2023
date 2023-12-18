@@ -71,22 +71,22 @@ void checkNode(Node current, int loopY, int loopX, direction targetDir) {
         } else {
             nodeMatrix[loopY][loopX].step = 4;
 
-            if (targetNode.dir == S) {
+            if (nodeMatrix[loopY][loopX].dir == S) {
                 for (size_t i = 1; i < 4; i++) {
                     nodeMatrix[loopY][loopX].shortest += nodeMatrix[loopY - i][loopX].weight;
                 }
             }
-            if (targetNode.dir == N) {
+            if (nodeMatrix[loopY][loopX].dir == N) {
                 for (size_t i = 1; i < 4; i++) {
                     nodeMatrix[loopY][loopX].shortest += nodeMatrix[loopY + i][loopX].weight;
                 }
             }
-            if (targetNode.dir == E) {
+            if (nodeMatrix[loopY][loopX].dir == E) {
                 for (size_t i = 1; i < 4; i++) {
                     nodeMatrix[loopY][loopX].shortest += nodeMatrix[loopY][loopX - i].weight;
                 }
             }
-            if (targetNode.dir == W) {
+            if (nodeMatrix[loopY][loopX].dir == W) {
                 for (size_t i = 1; i < 4; i++) {
                     nodeMatrix[loopY][loopX].shortest += nodeMatrix[loopY][loopX + i].weight;
                 }
