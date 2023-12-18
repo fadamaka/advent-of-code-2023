@@ -8,7 +8,7 @@
 #include <vector>
 
 using namespace std;
-int recCount = 0;
+int solution = INT_MAX;
 enum direction {
     N,
     S,
@@ -17,11 +17,14 @@ enum direction {
     O
 };
 
+set<tuple<int, pair<direction, int>, pair<int, int>>> visited;
 struct Node {
     int weight;
     direction dir;
     int step;
     int shortest;
+    int y;
+    int x;
     Node(int input) {
         weight = input;
         dir = O;
@@ -99,18 +102,27 @@ void checkNode(Node current, int loopY, int loopX, direction targetDir) {
 
 void calculatePath(int y, int x) {
     // cout << recCount++ << " " << y << ":" << x << endl;
-    Node current = nodeMatrix[y][x];
-    if (current.shortest > (nodeMatrix.size() + nodeMatrix[y].size()) * 9 || current.shortest > nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest) {
+    Node current = nodeMatrix[y][x];                                                                                           //  (nodeMatrix.size()-1 + nodeMatrix[y].size()-1) * 9
+    if (current.shortest > 1090 || current.shortest > nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest) {  // used a wrong iteration to determine a wrong but relative close answer
         return;
     }
-    // if (y == nodeMatrix.size() - 1 && x == nodeMatrix[0].size() - 1) {
-    //     cout << "yolo result: " << current.shortest << endl;
-    // }
+    if (y == nodeMatrix.size() - 1 && x == nodeMatrix[0].size() - 1 && solution > current.shortest) {
+        // cout << "yolo result: " << current.shortest << endl;
+        solution = current.shortest;
+    }
+    tuple<int, pair<direction, int>, pair<int, int>>
+        input(current.shortest, pair<direction, int>(current.dir, current.step), pair<int, int>(y, x));
+    if (visited.find(input) != visited.end()) {
+        // cout << "hit" << endl;
+        return;
+    } else {
+        visited.insert(input);
+    }
     set<direction> allowedDir;
     int targetShortest = INT_MAX;
     int targetY = 0;
     int targetX = 0;
-    if (current.step > 4) {
+    if (current.step > 3) {
         if (current.dir == N || current.dir == S) {
             allowedDir = {W, E};
         }
@@ -127,7 +139,7 @@ void calculatePath(int y, int x) {
     Node targetNode;
     int step;
     for (direction d : allowedDir) {
-        if (current.step < 4) {
+        if (current.step < 4 || current.dir != d) {
             step = 4;
         } else {
             step = 1;
@@ -155,12 +167,21 @@ int main() {
             return Node(int(ch)-48);});
         return row; });
     nodeMatrix[0][0].shortest = 0;
-    calculatePath(0, 0);
-    for (auto&& i : nodeMatrix) {
-        for (auto&& j : i) {
-            cout << setw(3) << j.shortest << " ";
+    for (size_t i = 0; i < nodeMatrix.size(); i++) {
+        for (size_t j = 0; j < nodeMatrix[i].size(); j++) {
+            nodeMatrix[i][j].y = i;
+            nodeMatrix[i][j].x = j;
         }
-        cout << endl;
+
+        /* code */
     }
-    cout << nodeMatrix[nodeMatrix.size() - 1][nodeMatrix[0].size() - 1].shortest;
+
+    calculatePath(0, 0);
+    // for (auto&& i : nodeMatrix) {
+    //     for (auto&& j : i) {
+    //         cout << setw(3) << j.shortest << " ";
+    //     }
+    //     cout << endl;
+    // }
+    cout << solution;
 }
