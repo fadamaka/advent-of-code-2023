@@ -51,7 +51,8 @@ ostream& operator<<(ostream& os, const Coord& coord) {
 }
 ostream& operator<<(ostream& os, const axis& ax) {
     string str = ax == X ? "X" : ax == Y ? "Y"
-                                         : "Z";
+                             : ax == Z   ? "Z"
+                                         : "O";
     os << str;
     return os;
 }
@@ -68,7 +69,176 @@ ostream& operator<<(ostream& os, const Brick& brick) {
 
 Brick* lineToBrick(string line);
 axis determineAxis(Coord start, Coord end);
+bool onSegment(Coord p, Coord q, Coord r);
+int orientation(Coord p, Coord q, Coord r);
+bool doIntersect(Coord p1, Coord q1, Coord p2, Coord q2);
 bool brickIntersect(Brick brickA, Brick brickB);
+bool compareByZ(Brick* a, Brick* b) {
+    return a->start.z < b->start.z;
+}
+
+bool compareByZnX(Brick* a, Brick* b) {
+    if (a->start.z == b->start.z) {
+        if (a->start.x == b->start.x) {
+            return a->start.y < b->start.y;
+        }
+        return a->start.x < b->start.x;
+    }
+    return a->start.z < b->start.z;
+}
+
+main() {
+    vector<string> lines = readFileIntoVector("data.txt");
+
+    vector<Brick*> unsortedBricks;
+    vector<Brick*> bricks;
+
+    transform(lines.begin(), lines.end(), back_inserter(unsortedBricks), [](const string& str) { return lineToBrick(str); });
+    transform(lines.begin(), lines.end(), back_inserter(bricks), [](const string& str) { return lineToBrick(str); });
+    sort(bricks.begin(), bricks.end(), compareByZ);
+
+    // for (auto&& i : bricks) {
+    //     cout << *i << endl;
+    // }
+
+    // take first brick and put to Z=1
+    bricks[0]->start.z = 1;
+    bricks[0]->end.z = 1;
+    // or just do a 2d array with Z as index and check intersections, when there is an intersection halt brick at Z=1
+    vector<vector<Brick*>> layers{vector<Brick*>{bricks[0]}};
+    // for (auto&& i : bricks) {
+    //     cout << *i << endl;
+    // }
+    // bricks.erase(bricks.begin());
+    bool first = true;
+    for (auto&& i : bricks) {
+        if (first) {
+            first = false;
+            continue;
+        }
+        bool intersects = false;
+        for (long j = layers.size() - 1; j >= 0; j--) {
+            for (auto&& k : layers[j]) {
+                if (brickIntersect(*i, *k)) {
+                    intersects = true;
+                    k->above.push_back(i);
+                    i->below.push_back(k);
+                }
+            }
+            if (intersects) {
+                if (layers.size() == j + 1) {
+                    layers.push_back(vector<Brick*>());
+                }
+                if (i->ax == Z) {
+                    while ((j + i->length) >= layers.size()) {
+                        layers.push_back(vector<Brick*>());
+                    }
+                    i->start.z = j + 2;
+                    i->end.z = j + 1 + i->length;
+                    layers[j + i->length].push_back(i);
+                } else {
+                    i->start.z = j + 2;
+                    i->end.z = j + 2;
+                    layers[j + 1].push_back(i);
+                }
+                break;
+            }
+        }
+        if (!intersects) {
+            i->start.z = 1;
+
+            if (i->ax != Z) {
+                i->end.z = 1;
+                layers[0].push_back(i);
+            } else {
+                i->end.z = i->length;
+
+                while ((i->length - 1) >= layers.size()) {
+                    layers.push_back(vector<Brick*>());
+                }
+                layers[i->length - 1].push_back(i);
+            }
+        }
+    }
+
+    // cout << layers.size() << endl;
+
+    // cout << brickIntersect(*bricks[1], *bricks[2]) << endl;
+    //
+
+    // for (auto&& i : layers) {
+    //     cout << endl;
+    //     for (auto&& j : i) {
+    //         cout << *j << endl;
+    //     }
+    // }
+    // cout << endl;
+    int disCount = 0;
+    int zMax = 0;
+
+    sort(bricks.begin(), bricks.end(), compareByZnX);
+    for (auto&& i : bricks) {
+        if (i->start.z > 0) {
+            zMax = i->start.z;
+        }
+        bool distintFlag = false;
+        if (i->above.size() == 0) {
+            distintFlag = true;
+        }
+        for (auto&& j : i->above) {
+            if (j->below.size() > 1) {
+                distintFlag = true;
+            } else {
+                distintFlag = false;
+                break;
+            }
+        }
+        if (distintFlag) {
+            disCount++;
+        }
+        // string str = distintFlag ? "TRUE" : "FALSE";
+        // cout << *i << " dis:" << str << " a:" << i->above.size() << " b:" << i->below.size() << endl;
+    }
+    // cout << endl;
+    cout << "result:" << disCount << endl;
+}
+Brick* lineToBrick(string line) {
+    vector<string> split = splitByChar(line, '~');
+    vector<string> start = splitByChar(split[0], ',');
+    vector<string> end = splitByChar(split[1], ',');
+
+    Coord startC = Coord(stoi(start[0]), stoi(start[1]), stoi(start[2]));
+    Coord endC = Coord(stoi(end[0]), stoi(end[1]), stoi(end[2]));
+    axis ax = determineAxis(startC, endC);
+
+    int len = 0;
+    if (ax == X) {
+        len = endC.x - startC.x;
+    }
+    if (ax == Y) {
+        len = endC.y - startC.y;
+    }
+    if (ax == Z) {
+        len = endC.z - startC.z;
+    }
+    len += 1;
+
+    return new Brick(startC,
+                     endC,
+                     ax, len);
+}
+axis determineAxis(Coord start, Coord end) {
+    if (start.x != end.x) {
+        return X;
+    }
+    if (start.y != end.y) {
+        return Y;
+    }
+    if (start.z != end.z) {
+        return Z;
+    }
+    return O;
+};
 
 bool onSegment(Coord p, Coord q, Coord r) {
     if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
@@ -124,67 +294,6 @@ bool doIntersect(Coord p1, Coord q1, Coord p2, Coord q2) {
     return false;  // Doesn't fall in any of the above cases
 }
 
-bool brickIntersect2(Brick a, Brick b) {
+bool brickIntersect(Brick a, Brick b) {
     return doIntersect(a.start, a.end, b.start, b.end);
 }
-
-main() {
-    vector<string> lines = readFileIntoVector("test-data.txt");
-    vector<Brick*> bricks;
-
-    transform(lines.begin(), lines.end(), back_inserter(bricks), [](const string& str) { return lineToBrick(str); });
-    // create 3d array of Brick Coorders
-    // or just do a 2d array with Z as index and check intersections, when there is an intersection halt brick at Z=1
-    // take first brick and put to Z=1
-    // record highest Z to start calculations from there
-
-    // THESE ARE JUST CoordS
-
-    for (auto&& i : bricks) {
-        cout << *i << endl;
-    }
-
-    cout << brickIntersect2(*bricks[0], *bricks[6]) << endl;
-    //
-}
-Brick* lineToBrick(string line) {
-    vector<string> split = splitByChar(line, '~');
-    vector<string> start = splitByChar(split[0], ',');
-    vector<string> end = splitByChar(split[1], ',');
-
-    Coord startC = Coord(stoi(start[0]), stoi(start[1]), stoi(start[2]));
-    Coord endC = Coord(stoi(end[0]), stoi(end[1]), stoi(end[2]));
-    axis ax = determineAxis(startC, endC);
-
-    int len = 0;
-    if (ax == X) {
-        len = endC.x - startC.x;
-    }
-    if (ax == Y) {
-        len = endC.y - startC.y;
-    }
-    if (ax == Z) {
-        len = endC.z - startC.z;
-    }
-    len += 1;
-
-    return new Brick(startC,
-                     endC,
-                     ax, len);
-}
-axis determineAxis(Coord start, Coord end) {
-    if (start.x != end.x) {
-        return X;
-    }
-    if (start.y != end.y) {
-        return Y;
-    }
-    if (start.z != end.z) {
-        return Z;
-    }
-    return O;
-};
-bool brickIntersect(Brick brickA, Brick brickB) {
-    return (brickA.start.x < brickB.end.x && brickA.end.x > brickB.start.x &&
-            brickA.start.y > brickB.end.y && brickA.end.y < brickB.start.y);
-};
