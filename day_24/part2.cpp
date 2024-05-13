@@ -174,4 +174,18 @@ int main() {
     Line line1 = Line(Vector3(0L, 10L, 0L), Vector3(0L, 100L, 0L));
     Line line2 = Line(Vector3(8L, 0L, 0L), Vector3(-1L, -2L, 0L));
     cout << intersect(line1, line2) << endl;
+
+    // make line of furthest points
+
+    // loop through all other points
+    // check if point intersect with new line
+    // look for integer intersect, also check if intersection is in the future
+
+    long long iterations = 10000000L;
+    for (long long i = 0; i < iterations; i++) {
+        TDPoint iPoint = v[a];
+        for (long long j = 0; j < iterations; j++) {
+            TDPoint jPoint = v[b];
+        }
+    }
 }
