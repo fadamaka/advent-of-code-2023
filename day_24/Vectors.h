@@ -423,7 +423,7 @@ inline Vector3 operator*(const long double a, const Vector3 vec) {
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Vector3& vec) {
-    os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+    os << "(" << std::to_string(vec.x) << ", " << std::to_string(vec.y) << ", " << std::to_string(vec.z) << ")";
     return os;
 }
 // END OF VECTOR3 /////////////////////////////////////////////////////////////

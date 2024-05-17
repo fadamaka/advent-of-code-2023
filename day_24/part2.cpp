@@ -88,7 +88,9 @@ Vector3 intersect(Line& line1, Line& line2) {
     Vector3 point = p + (t * v);
     return point;
 }
-
+Line tdToLine(TDPoint vector) {
+    return Line(Vector3(vector.x, vector.y, vector.z), Vector3(vector.xV, vector.yV, vector.zV));
+}
 int main() {
     vector<string> lines = readFileIntoVector("data.txt");
 
@@ -186,6 +188,21 @@ int main() {
         TDPoint iPoint = v[a];
         for (long long j = 0; j < iterations; j++) {
             TDPoint jPoint = v[b];
+            iPoint.increment(i);
+            jPoint.increment(j);
+            TDPoint diff = iPoint - jPoint;
+            Line line = tdToLine(diff);
+            for (size_t k = 0; k < v.size(); k++) {
+                TDPoint kPoint = v[k];
+                Line kLine = tdToLine(kPoint);
+                Vector3 intersection = intersect(line, kLine);
+                double intpart;
+                if (modf(intersection.x, &intpart) == 0.0 && modf(intersection.y, &intpart) == 0.0 && modf(intersection.z, &intpart) == 0.0) {
+                    cout << intersection << endl;
+                } else {
+                    break;
+                }
+            }
         }
     }
 }
