@@ -115,8 +115,15 @@ Eigen::Vector3d intersectionPoint(Eigen::Vector3d P1, Eigen::Vector3d V1, Eigen:
     return intersection;
 }
 
+// Function to calculate the intersection point of two lines in 3D
+Eigen::Vector3d intersectionPoint(TDPoint a, TDPoint b) {
+    Eigen::Vector3d P1(a.x, a.y, a.z), V1(a.xV, a.yV, a.zV), P2(b.x, b.y, b.z), V2(b.xV, b.yV, b.zV);
+
+    return intersectionPoint(P1, V1, P2, V2);
+}
+
 int main() {
-    vector<string> lines = readFileIntoVector("test-data.txt");
+    vector<string> lines = readFileIntoVector("data.txt");
 
     vector<TDPoint> v;
 
@@ -216,8 +223,9 @@ int main() {
     // check if point intersect with new line
     // look for integer intersect, also check if intersection is in the future
 
-    long long iterations = 10L;
+    long long iterations = 100000L;
     for (long long i = 0; i < iterations; i++) {
+        // cout << i << endl;
         for (long long j = 0; j < iterations; j++) {
             TDPoint iPoint = v[a];
             TDPoint jPoint = v[b];
@@ -226,12 +234,15 @@ int main() {
             TDPoint diff = iPoint - jPoint;
             Line line = tdToLine(diff);
             for (size_t k = 0; k < v.size(); k++) {
-                TDPoint kPoint = v[k];
-                Line kLine = tdToLine(kPoint);
-                Vector3 intersection = intersect(line, kLine);
+                Eigen::Vector3d intersection = intersectionPoint(diff, v[k]);
                 double intpart;
-                if (modf(intersection.x, &intpart) == 0.0 && modf(intersection.y, &intpart) == 0.0 && modf(intersection.z, &intpart) == 0.0) {
-                    cout << intersection << endl;
+                if (modf(intersection[0], &intpart) == 0.0 && modf(intersection[1], &intpart) == 0.0 && modf(intersection[2], &intpart) == 0.0) {
+                    if (k != 0) {
+                        cout << k << " " << intersection.transpose() << endl;
+                    }
+                    if (v.size() - 1 == k) {
+                        cout << "found" << endl;
+                    }
                 } else {
                     break;
                 }
