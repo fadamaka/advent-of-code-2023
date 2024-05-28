@@ -1,6 +1,7 @@
 #include <..\utils\aoc.h>
 #include <Line.h>
 
+#include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -89,10 +90,33 @@ Vector3 intersect(Line& line1, Line& line2) {
     return point;
 }
 Line tdToLine(TDPoint vector) {
-    return Line(Vector3(vector.x, vector.y, vector.z), Vector3(vector.xV, vector.yV, vector.zV));
+    TDPoint nV = vector;
+    nV.increment(10000L);
+    return Line(Vector3(vector.x, vector.y, vector.z), Vector3(nV.x, nV.y, nV.z));
 }
+
+// Function to calculate the intersection point of two lines in 3D
+Eigen::Vector3d intersectionPoint(Eigen::Vector3d P1, Eigen::Vector3d V1, Eigen::Vector3d P2, Eigen::Vector3d V2) {
+    // Calculate the cross product of V1 and V2
+    Eigen::Vector3d V1_cross_V2 = V1.cross(V2);
+
+    // Check if the lines are parallel
+    if (V1_cross_V2.norm() == 0) {
+        std::cout << "The lines are parallel and do not intersect." << std::endl;
+        return Eigen::Vector3d::Zero();
+    }
+
+    // Calculate the scalar 'a'
+    double a = ((P2 - P1).cross(V2)).norm() / V1_cross_V2.norm();
+
+    // Calculate the intersection point
+    Eigen::Vector3d intersection = P1 + a * V1;
+
+    return intersection;
+}
+
 int main() {
-    vector<string> lines = readFileIntoVector("data.txt");
+    vector<string> lines = readFileIntoVector("test-data.txt");
 
     vector<TDPoint> v;
 
@@ -165,13 +189,22 @@ int main() {
     cout << b << ": " << v[b] << endl;
     TDPoint aV = v[a];
     TDPoint bV = v[b];
-    aV.increment(10000000000L);
-    bV;
+    aV.increment(4L);
+    bV.increment(1L);
     cout << "distance: " << getDistance(aV, bV) << endl;
     cout << a << ": " << aV << endl;
     cout << b << ": " << bV << endl;
+    TDPoint cV = bV - aV;
+    cout << tdToLine(cV).direction << tdToLine(cV).point << endl;
+    TDPoint testV = TDPoint(24L, 13L, 10L, -3L, 1L, 2L);
+    // testV.increment(2L);
+    Line testLine = tdToLine(testV);
+    TDPoint dV = v[1];
+    Line dLine = tdToLine(dV);
+    cout << intersect(testLine, dLine) << endl;
+    cout << intersect(dLine, testLine) << endl;
 
-    cout << "5?: " << getDistance(TDPoint(0L, 0L, 0L, 0L, 0L, 0L), TDPoint(3L, 4L, 0L, 0L, 0L, 0L)) << endl;
+    // cout << "5?: " << getDistance(TDPoint(0L, 0L, 0L, 0L, 0L, 0L), TDPoint(3L, 4L, 0L, 0L, 0L, 0L)) << endl;
 
     Line line1 = Line(Vector3(0L, 10L, 0L), Vector3(0L, 100L, 0L));
     Line line2 = Line(Vector3(8L, 0L, 0L), Vector3(-1L, -2L, 0L));
@@ -183,10 +216,10 @@ int main() {
     // check if point intersect with new line
     // look for integer intersect, also check if intersection is in the future
 
-    long long iterations = 10000000L;
+    long long iterations = 10L;
     for (long long i = 0; i < iterations; i++) {
-        TDPoint iPoint = v[a];
         for (long long j = 0; j < iterations; j++) {
+            TDPoint iPoint = v[a];
             TDPoint jPoint = v[b];
             iPoint.increment(i);
             jPoint.increment(j);
@@ -205,4 +238,16 @@ int main() {
             }
         }
     }
+
+    // Define points and direction vectors for two lines
+    Eigen::Vector3d P1(24L, 13L, 10L), V1(-9L, 3L, 6L), P2(19, 13, 30), V2(-2, 1, -2);
+
+    // Calculate the intersection point
+    Eigen::Vector3d intersection = intersectionPoint(P1, V1, P2, V2);
+
+    // Print the intersection point
+    std::cout << "The intersection point is: " << intersection.transpose() << std::endl;
+
+    // Print the intersection point
+    std::cout << "The intersection point is: " << intersection[1] << std::endl;
 }
