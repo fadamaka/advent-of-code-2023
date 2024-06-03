@@ -186,42 +186,6 @@ int main() {
         v.push_back(TDPoint(x, y, z, xV, yV, zV));
     }
 
-    // for (auto&& i : v) {
-    //     cout << i << endl;
-    // }
-
-    // vector<map<tuple<long long, long long, long long>, TDPoint>> timeVector;
-    // for (size_t i = 0; i <= v.size(); i++) {
-    //     map<tuple<long long, long long, long long>, TDPoint> fv;
-    //     for (auto&& e : v) {
-    //         TDPoint element = e;
-    //         element.increment(i);
-    //         fv.insert(pair<tuple<long long, long long, long long>, TDPoint>(tuple<long long, long long, long long>(element.x, element.y, element.z), element));
-    //     }
-    //     timeVector.push_back(fv);
-    // }
-    // int counter = 0;
-    // for (auto&& v : timeVector) {
-    //     cout << counter++ << endl;
-    //     for (auto&& i : v) {
-    //         cout << i.second << endl;
-    //     }
-    // }
-
-    // for (auto&& i : timeVector[1]) {
-    //     for (auto&& j : timeVector[2]) {
-    //         TDPoint k = i.second - j.second;
-    //         k.increment(2);
-    //         if (timeVector[3].find(tuple<long long, long long, long long>(k.x, k.y, k.z)) != timeVector[3].end()) {
-    //             cout << "1: " << i.second << endl;
-    //             cout << "2: " << j.second << endl;
-    //             cout << "3: " << timeVector[3].find(tuple<long long, long long, long long>(k.x, k.y, k.z))->second << endl;
-    //             cout << "k: " << k << endl;
-    //         } else {
-    //             cout << "no match" << endl;
-    //         }
-    //     }
-    // }
     long double maxDistance = 0L;
     size_t a;
     size_t b;
@@ -235,38 +199,7 @@ int main() {
             }
         }
     }
-    // cout << "distance: " << maxDistance << endl;
-    // cout << a << ": " << v[a] << endl;
-    // cout << b << ": " << v[b] << endl;
-    // TDPoint aV = v[a];
-    // TDPoint bV = v[b];
-    // aV.increment(4L);
-    // bV.increment(1L);
-    // cout << "distance: " << getDistance(aV, bV) << endl;
-    // cout << a << ": " << aV << endl;
-    // cout << b << ": " << bV << endl;
-    // TDPoint cV = bV - aV;
-    // cout << tdToLine(cV).direction << tdToLine(cV).point << endl;
-    // TDPoint testV = TDPoint(24L, 13L, 10L, -3L, 1L, 2L);
-    // // testV.increment(2L);
-    // Line testLine = tdToLine(testV);
-    // TDPoint dV = v[1];
-    // Line dLine = tdToLine(dV);
-    // cout << intersect(testLine, dLine) << endl;
-    // cout << intersect(dLine, testLine) << endl;
-
-    // cout << "5?: " << getDistance(TDPoint(0L, 0L, 0L, 0L, 0L, 0L), TDPoint(3L, 4L, 0L, 0L, 0L, 0L)) << endl;
-
-    // Line line1 = Line(Vector3(0L, 10L, 0L), Vector3(0L, 100L, 0L));
-    // Line line2 = Line(Vector3(8L, 0L, 0L), Vector3(-1L, -2L, 0L));
-    // cout << intersect(line1, line2) << endl;
-
-    // make line of furthest points
-
-    // loop through all other points
-    // check if point intersect with new line
-    // look for integer intersect, also check if intersection is in the future
-
+    // had a brute force solution to get these, but was not good enough so got them from another solution
     long long i = 207074028602100LL;
     long long j = 592072466466LL;
     TDPoint iPoint = v[a];
