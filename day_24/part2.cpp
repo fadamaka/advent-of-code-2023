@@ -166,6 +166,30 @@ bool workFunc(long long iterations, long long start, long long end, vector<TDPoi
     return false;
 }
 
+struct Coords {
+    long long x;
+    long long y;
+    long long z;
+    Coords(){};
+    Coords(
+        long long x,
+        long long y,
+        long long z) {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    };
+};
+
+bool compareByZnX(Coords a, Coords b) {
+    if (a.x == b.x) {
+        if (a.y == b.y) {
+            return a.z < b.z;
+        }
+        return a.y < b.y;
+    }
+    return a.x < b.x;
+}
 int main() {
     vector<string> lines = readFileIntoVector("data.txt");
 
@@ -199,6 +223,7 @@ int main() {
             }
         }
     }
+    vector<Coords> vc;
     // had a brute force solution to get these, but was not good enough so got them from another solution
     long long i = 207074028602100LL;
     long long j = 592072466466LL;
@@ -208,17 +233,10 @@ int main() {
     jPoint.increment(j);
     TDPoint diff = iPoint - jPoint;
     for (size_t k = 0; k < v.size(); k++) {
-        if (k == a || k == b) {
-            if (v.size() - 1 == k) {
-                cout << "found:" << endl;
-                cout << "i: " << i << endl;
-                cout << "j: " << j << endl;
-            }
-            continue;
-        }
         Eigen::Vector3d intersection = intersectionPoint(diff, v[k]);
         double intpart;
         if (modf(intersection[0], &intpart) == 0.0 && modf(intersection[1], &intpart) == 0.0 && modf(intersection[2], &intpart) == 0.0) {
+            vc.push_back(Coords(intersection[0], intersection[1], intersection[2]));
             if (k > 1) {
                 cout << k << " " << intersection.transpose() << endl;
             }
@@ -231,4 +249,23 @@ int main() {
             break;
         }
     }
+    sort(vc.begin(), vc.end(), compareByZnX);
+    long long xv = vc[1].x - vc[0].x;
+    long long yv;
+    long long zv;
+    for (size_t i = 0; i < vc.size() - 1; i++) {
+        long long curx = vc[i + 1].x - vc[i].x;
+        if (curx < xv) {
+            cout << curx << endl;
+            xv = curx;
+            yv = vc[i + 1].y - vc[i].y;
+            zv = vc[i + 1].z - vc[i].z;
+        }
+    }
+
+    cout << xv << endl;
+    cout << yv << endl;
+    cout << zv << endl;
+
+    cout << xv % 148 << endl;
 }
