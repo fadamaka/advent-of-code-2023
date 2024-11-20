@@ -7,6 +7,41 @@
 #include <vector>
 using namespace std;
 
+vector<string> crossroads;
+
+struct Node {
+    int id;
+    int x;
+    int y;
+
+    Node(int id, int x, int y) {
+        this->id = id;
+        this->x = x;
+        this->y = y;
+    }
+};
+ostream& operator<<(ostream& os, const Node& node) {
+    os << "ID: "
+       << node.id
+       << " x: "
+       << node.x
+       << " y: "
+       << node.y;
+    return os;
+}
+
+int walkToCrossroad(set<pair<int, int>> visited, pair<int, int>& pos, int counter) {
+    int x = pos.first;
+    int y = pos.second;
+    if (crossroads[x][y] == '.' && visited.find(pair<int, int>(x, y)) == visited.end()) {
+        pos = pair<int, int>(x, y);
+        return counter;
+    } else {
+        counter++;
+    }
+    return 0;
+}
+
 int main() {
     vector<string> lines = readFileIntoVector("data2.txt");
 
@@ -21,8 +56,8 @@ int main() {
         }
         cleaned.push_back(str);
     }
-    vector<string> crossroads;
-    for (auto &&i : cleaned) {
+
+    for (auto&& i : cleaned) {
         crossroads.push_back(i);
     }
 
@@ -48,10 +83,25 @@ int main() {
             }
         }
     }
-
-    for (auto &&i : crossroads) {
-        myfile << i << endl;
+    int count = 0;
+    vector<Node> nodes;
+    for (int i = 1; i < crossroads.size() - 1; i++) {
+        for (int j = 1; j < crossroads[i].size() - 1; j++) {
+            if (crossroads[i][j] == 'x') {
+                Node node = Node(++count, i, j);
+                cout << node << endl;
+            }
+        }
     }
 
+    int edgeMatrix[lines.size() - 1][lines[0].size() - 1];
+    bool end = false;
+    int x = 3;
+    int y = 11;
+    while (!end) {
+    }
+    for (auto&& i : crossroads) {
+        myfile << i << endl;
+    }
     myfile.close();
 }
