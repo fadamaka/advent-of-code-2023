@@ -9,6 +9,7 @@ using namespace std;
 
 vector<string> crossroads;
 
+vector<pair<int, int>> directions = {pair<int, int>(-1, 0), pair<int, int>(1, 0), pair<int, int>(0, -1), pair<int, int>(0, 1)};
 struct Node {
     int id;
     int x;
@@ -31,13 +32,21 @@ ostream& operator<<(ostream& os, const Node& node) {
 }
 
 int walkToCrossroad(set<pair<int, int>> visited, pair<int, int>& pos, int counter) {
-    int x = pos.first;
-    int y = pos.second;
-    if (crossroads[x][y] == '.' && visited.find(pair<int, int>(x, y)) == visited.end()) {
-        pos = pair<int, int>(x, y);
-        return counter;
-    } else {
-        counter++;
+    for (auto&& i : directions) {
+        int x = pos.first + i.first;
+        int y = pos.second + i.second;
+        if (crossroads[x][y] == '.' && visited.find(pair<int, int>(x, y)) == visited.end()) {
+            pos = pair<int, int>(x, y);
+            visited.insert(pos);
+            counter++;
+            return walkToCrossroad(visited, pos, counter);
+        } else {
+            if (crossroads[x][y] == 'x' && visited.find(pair<int, int>(x, y)) == visited.end()) {
+                counter++;
+                pos = pair<int, int>(x, y);
+                return counter;
+            }
+        }
     }
     return 0;
 }
@@ -98,10 +107,26 @@ int main() {
     bool end = false;
     int x = 3;
     int y = 11;
-    while (!end) {
-    }
+
     for (auto&& i : crossroads) {
         myfile << i << endl;
     }
+    pair<int, int> firstX = pair<int, int>(1, 1);
+    set<pair<int, int>> firstVisited;
+    firstVisited.insert(pair<int, int>(0, 1));
+    firstVisited.insert(firstX);
+    cout << "first x distance:" << walkToCrossroad(firstVisited, firstX, 1) << endl;
+    cout << "first x pos:" << firstX.first << " " << firstX.second << endl;
     myfile.close();
+    cout << crossroads[x][y] << endl;
+    for (auto&& i : directions) {
+        cout << crossroads[x + i.first][y + i.second] << endl;
+        if (crossroads[x + i.first][y + i.second] == '.') {
+            pair<int, int> pos = pair<int, int>(x + i.first, y + i.second);
+            set<pair<int, int>> visited;
+            visited.insert(pair<int, int>(x, y));
+            visited.insert(pos);
+            cout << walkToCrossroad(visited, pos, 1) << " " << pos.first << " " << pos.second << endl;
+        }
+    }
 }
