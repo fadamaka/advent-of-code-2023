@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -35,6 +36,12 @@ int walkToCrossroad(set<pair<int, int>> visited, pair<int, int>& pos, int counte
     for (auto&& i : directions) {
         int x = pos.first + i.first;
         int y = pos.second + i.second;
+        if (x < 0) {
+            return 0;
+        }
+        if (x > crossroads.size() - 1) {
+            return 0;
+        }
         if (crossroads[x][y] == '.' && visited.find(pair<int, int>(x, y)) == visited.end()) {
             pos = pair<int, int>(x, y);
             visited.insert(pos);
@@ -49,6 +56,35 @@ int walkToCrossroad(set<pair<int, int>> visited, pair<int, int>& pos, int counte
         }
     }
     return 0;
+}
+
+int** fillEdgeMatrix(map<pair<int, int>, int> nodeMap) {
+    int edgeMatrix[nodeMap.size() - 1][nodeMap.size() - 1];
+    int** arr = new int*[nodeMap.size()];
+    for (int i = 0; i < nodeMap.size(); ++i) {
+        arr[i] = new int[nodeMap.size()];
+        for (int j = 0; j < nodeMap.size(); ++j) {
+            arr[i][j] = 0;
+        }
+    }
+    for (auto&& n : nodeMap) {
+        int x = n.first.first;
+        int y = n.first.second;
+        for (auto&& i : directions) {
+            cout << crossroads[x + i.first][y + i.second] << endl;
+            if (crossroads[x + i.first][y + i.second] == '.') {
+                pair<int, int> pos = pair<int, int>(x + i.first, y + i.second);
+                set<pair<int, int>> visited;
+                visited.insert(pair<int, int>(x, y));
+                visited.insert(pos);
+                int edge = walkToCrossroad(visited, pos, 1);
+                if (edge != 0)
+                    arr[n.second][nodeMap.find(pos)->second] = edge;
+            }
+        }
+    }
+
+    return arr;
 }
 
 int main() {
@@ -94,16 +130,42 @@ int main() {
     }
     int count = 0;
     vector<Node> nodes;
+    map<pair<int, int>, int> nodeMap;
+
     for (int i = 1; i < crossroads.size() - 1; i++) {
         for (int j = 1; j < crossroads[i].size() - 1; j++) {
             if (crossroads[i][j] == 'x') {
-                Node node = Node(++count, i, j);
+                Node node = Node(count, i, j);
+                nodeMap.insert(pair<pair<int, int>, int>(pair<int, int>(i, j), count));
+                count++;
                 cout << node << endl;
             }
         }
     }
 
-    int edgeMatrix[lines.size() - 1][lines[0].size() - 1];
+    for (auto&& i : nodeMap) {
+        cout << "ID: "
+             << i.second
+             << " x: "
+             << i.first.first
+             << " y: "
+             << i.first.second << endl;
+    }
+
+    int** edgeMatrix;
+    edgeMatrix = fillEdgeMatrix(nodeMap);
+    for (int i = 0; i < nodeMap.size() - 1; ++i) {
+        for (int j = 0; j < nodeMap.size() - 1; ++j) {
+            cout << edgeMatrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+    // for (int i = 0; i < nodeMap.size() - 1; i++) {
+    //     for (int j = 0; j < nodeMap.size() - 1; j++) {
+    //         edgeMatrix[i][j] = 0;
+    //     }
+    // }
+
     bool end = false;
     int x = 3;
     int y = 11;
@@ -117,6 +179,7 @@ int main() {
     firstVisited.insert(firstX);
     cout << "first x distance:" << walkToCrossroad(firstVisited, firstX, 1) << endl;
     cout << "first x pos:" << firstX.first << " " << firstX.second << endl;
+    cout << "first x ID:" << nodeMap.find(firstX)->second << endl;
     myfile.close();
     cout << crossroads[x][y] << endl;
     for (auto&& i : directions) {
