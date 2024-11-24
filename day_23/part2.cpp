@@ -71,7 +71,7 @@ int** fillEdgeMatrix(map<pair<int, int>, int> nodeMap) {
         int x = n.first.first;
         int y = n.first.second;
         for (auto&& i : directions) {
-            cout << crossroads[x + i.first][y + i.second] << endl;
+            // cout << crossroads[x + i.first][y + i.second] << endl;
             if (crossroads[x + i.first][y + i.second] == '.') {
                 pair<int, int> pos = pair<int, int>(x + i.first, y + i.second);
                 set<pair<int, int>> visited;
@@ -88,7 +88,7 @@ int** fillEdgeMatrix(map<pair<int, int>, int> nodeMap) {
 }
 
 int main() {
-    vector<string> lines = readFileIntoVector("data2.txt");
+    vector<string> lines = readFileIntoVector("data.txt");
 
     ofstream myfile;
     vector<string> cleaned;
@@ -143,19 +143,10 @@ int main() {
         }
     }
 
-    for (auto&& i : nodeMap) {
-        cout << "ID: "
-             << i.second
-             << " x: "
-             << i.first.first
-             << " y: "
-             << i.first.second << endl;
-    }
-
     int** edgeMatrix;
     edgeMatrix = fillEdgeMatrix(nodeMap);
-    for (int i = 0; i < nodeMap.size() - 1; ++i) {
-        for (int j = 0; j < nodeMap.size() - 1; ++j) {
+    for (int i = 0; i < nodeMap.size(); ++i) {
+        for (int j = 0; j < nodeMap.size(); ++j) {
             cout << edgeMatrix[i][j] << " ";
         }
         cout << endl;
@@ -177,19 +168,19 @@ int main() {
     set<pair<int, int>> firstVisited;
     firstVisited.insert(pair<int, int>(0, 1));
     firstVisited.insert(firstX);
-    cout << "first x distance:" << walkToCrossroad(firstVisited, firstX, 1) << endl;
+    int firstDistance = walkToCrossroad(firstVisited, firstX, 1);
+    cout << "first x distance:" << firstDistance << endl;
     cout << "first x pos:" << firstX.first << " " << firstX.second << endl;
     cout << "first x ID:" << nodeMap.find(firstX)->second << endl;
+
+    pair<int, int> lastX = pair<int, int>(lines.size() - 2, lines.size() - 2);
+    set<pair<int, int>> lastVisited;
+    lastVisited.insert(pair<int, int>(lines.size() - 1, lines.size() - 2));
+    lastVisited.insert(lastX);
+    int lastDistance = walkToCrossroad(lastVisited, lastX, 1);
+    cout << "last x distance:" << lastDistance << endl;
+    cout << "last x pos:" << lastX.first << " " << lastX.second << endl;
+    cout << "last x ID:" << nodeMap.find(lastX)->second << endl;
+    cout << "add to longest: " << firstDistance + lastDistance << endl;
     myfile.close();
-    cout << crossroads[x][y] << endl;
-    for (auto&& i : directions) {
-        cout << crossroads[x + i.first][y + i.second] << endl;
-        if (crossroads[x + i.first][y + i.second] == '.') {
-            pair<int, int> pos = pair<int, int>(x + i.first, y + i.second);
-            set<pair<int, int>> visited;
-            visited.insert(pair<int, int>(x, y));
-            visited.insert(pos);
-            cout << walkToCrossroad(visited, pos, 1) << " " << pos.first << " " << pos.second << endl;
-        }
-    }
 }
