@@ -105,13 +105,14 @@ int** deleteNodes(int** input, int size, int nodeId) {
     return input;
 }
 
-void walkAll(int** edgeMatrix, int size, int nodeId, int count, int& result, int endId) {
+void walkAll(int** edgeMatrix, int size, int nodeId, int count, int& result, int endId, set<int> visited) {
+    visited.insert(nodeId);
     int counter = 0;
     // cout << nodeId << endl;
     for (int i = 0; i < size; ++i) {
-        if (edgeMatrix[nodeId][i] > 0) {
+        if (edgeMatrix[nodeId][i] > 0 && visited.find(i) == visited.end()) {
             int edgeWeight = edgeMatrix[nodeId][i];
-            walkAll(deleteNodes(copyArray(edgeMatrix, size), size, nodeId), size, i, count + edgeWeight, result, endId);
+            walkAll(edgeMatrix, size, i, count + edgeWeight, result, endId, visited);
             counter++;
         }
     }
@@ -222,7 +223,7 @@ int main() {
     myfile.close();
 
     int result = 0;
-    walkAll(edgeMatrix, nodeMap.size(), nodeMap.find(firstX)->second, firstDistance + lastDistance, result, nodeMap.find(lastX)->second);
+    walkAll(edgeMatrix, nodeMap.size(), nodeMap.find(firstX)->second, firstDistance + lastDistance, result, nodeMap.find(lastX)->second, set<int>());
     cout << "result: " << result << endl;
 }
 
