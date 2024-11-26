@@ -59,7 +59,6 @@ int walkToCrossroad(set<pair<int, int>> visited, pair<int, int>& pos, int counte
 }
 
 int** fillEdgeMatrix(map<pair<int, int>, int> nodeMap) {
-    int edgeMatrix[nodeMap.size() - 1][nodeMap.size() - 1];
     int** arr = new int*[nodeMap.size()];
     for (int i = 0; i < nodeMap.size(); ++i) {
         arr[i] = new int[nodeMap.size()];
@@ -85,6 +84,44 @@ int** fillEdgeMatrix(map<pair<int, int>, int> nodeMap) {
     }
 
     return arr;
+}
+
+int** copyArray(int** orig, int size) {
+    int** arr = new int*[size];
+    for (int i = 0; i < size; ++i) {
+        arr[i] = new int[size];
+        for (int j = 0; j < size; ++j) {
+            arr[i][j] = orig[i][j];
+        }
+    }
+    return arr;
+}
+
+int** deleteNodes(int** input, int size, int nodeId) {
+    for (int i = 0; i < size; ++i) {
+        input[i][nodeId] = 0;
+        input[nodeId][i] = 0;
+    }
+    return input;
+}
+
+void walkAll(int** edgeMatrix, int size, int nodeId, int count, int& result, int endId) {
+    int counter = 0;
+    // cout << nodeId << endl;
+    for (int i = 0; i < size; ++i) {
+        if (edgeMatrix[nodeId][i] > 0) {
+            int edgeWeight = edgeMatrix[nodeId][i];
+            walkAll(deleteNodes(copyArray(edgeMatrix, size), size, nodeId), size, i, count + edgeWeight, result, endId);
+            counter++;
+        }
+    }
+    if (counter == 0) {
+        if (count > result) {
+            if (nodeId == endId) {
+                result = count;
+            }
+        }
+    }
 }
 
 int main() {
@@ -183,4 +220,16 @@ int main() {
     cout << "last x ID:" << nodeMap.find(lastX)->second << endl;
     cout << "add to longest: " << firstDistance + lastDistance << endl;
     myfile.close();
+
+    int result = 0;
+    walkAll(edgeMatrix, nodeMap.size(), nodeMap.find(firstX)->second, firstDistance + lastDistance, result, nodeMap.find(lastX)->second);
+    cout << "result: " << result << endl;
 }
+
+/*
+create recursive solution that branches out and takes all paths, it passes down the the adjactency matrix and removes the edges of visited nodes, when reaches end node or gets to a dead end terminates
+
+dead end = 0
+end node = sum(weights)
+
+*/
